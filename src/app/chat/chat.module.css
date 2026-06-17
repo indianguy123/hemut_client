@@ -254,6 +254,24 @@
   background: rgba(0, 0, 0, 0.06);
 }
 
+.messageSelf {
+  flex-direction: row-reverse;
+}
+
+.messageSelf .messageContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.messageSelf .messageHeader {
+  flex-direction: row-reverse;
+}
+
+.messageSelf .messageText {
+  text-align: right;
+}
+
 .messageAvatar {
   width: 40px;
   height: 40px;

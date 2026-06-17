@@ -424,7 +424,7 @@ export default function ChannelPage() {
               {group.messages.map((msg) => (
                 <div 
                   key={msg.id} 
-                  className={`${styles.messageGroup} ${msg.status === 'sending' ? styles.messageSending : ''} ${msg.status === 'error' ? styles.messageError : ''}`}
+                  className={`${styles.messageGroup} ${msg.sender_id === user?.id ? styles.messageSelf : ''} ${msg.status === 'sending' ? styles.messageSending : ''} ${msg.status === 'error' ? styles.messageError : ''}`}
                 >
                   <div className={styles.messageAvatar}>
                     {getInitials(msg.sender_display_name)}
