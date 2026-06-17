@@ -176,3 +176,24 @@ export function xhrPost<T = unknown>(
 ): XHRHandle<T> {
   return xhrRequest<T>({ method: 'POST', url, body, headers });
 }
+
+/**
+ * Convenience wrapper for PATCH requests.
+ */
+export function xhrPatch<T = unknown>(
+  url: string,
+  body: unknown,
+  headers?: Record<string, string>
+): XHRHandle<T> {
+  return xhrRequest<T>({ method: 'PATCH', url, body, headers });
+}
+
+/**
+ * Convenience wrapper for DELETE requests.
+ */
+export function xhrDelete<T = unknown>(
+  url: string,
+  headers?: Record<string, string>
+): XHRHandle<T> {
+  return xhrRequest<T>({ method: 'DELETE', url, headers });
+}

@@ -37,6 +37,10 @@ export const API = {
 
   // Health
   HEALTH: `${API_URL}/api/health`,
+
+  // Alerts
+  ALERTS: `${API_URL}/api/alerts`,
+  RESOLVE_ALERT: (id: string) => `${API_URL}/api/alerts/${id}/resolve`,
 } as const;
 
 export const WS = {

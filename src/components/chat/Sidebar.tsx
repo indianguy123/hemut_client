@@ -51,6 +51,17 @@ export default function Sidebar() {
   const [newChannelName, setNewChannelName] = useState('');
   const [allUsers, setAllUsers] = useState<UserInfo[]>([]);
   const [channelError, setChannelError] = useState('');
+  const [alertsUnreadCount, setAlertsUnreadCount] = useState(0);
+
+  const loadAlertsCount = useCallback(async () => {
+    try {
+      const { promise } = xhrGet<{ alerts: any[] }>(API.ALERTS, getAuthHeaders());
+      const resp = await promise;
+      setAlertsUnreadCount(resp.data.alerts.length);
+    } catch (err) {
+      console.error('Failed to load alerts count:', err);
+    }
+  }, []);
 
   const loadChannels = useCallback(async () => {
     try {
@@ -75,7 +86,8 @@ export default function Sidebar() {
   useEffect(() => {
     loadChannels();
     loadDMs();
-  }, [loadChannels, loadDMs]);
+    loadAlertsCount();
+  }, [loadChannels, loadDMs, loadAlertsCount]);
 
   // Listen for new messages to update unread counts
   useEffect(() => {
@@ -96,12 +108,18 @@ export default function Sidebar() {
       setPresenceMap(prev => ({ ...prev, [userId]: status }));
     };
 
+    const handleAlertCreated = () => {
+      setAlertsUnreadCount(prev => prev + 1);
+    };
+
     on('new_message', handleNewMessage);
     on('presence_update', handlePresence);
+    on('AI_ALERT_CREATED', handleAlertCreated);
 
     return () => {
       off('new_message', handleNewMessage);
       off('presence_update', handlePresence);
+      off('AI_ALERT_CREATED', handleAlertCreated);
     };
   }, [on, off, pathname]);
 
@@ -170,6 +188,25 @@ export default function Sidebar() {
         <div className={styles.connectionStatus}>
           <span className={`${styles.connectionDot} ${isConnected ? styles.connected : ''}`} />
         </div>
+      </div>
+
+      {/* Global Apps / Alerts */}
+      <div className={styles.section} style={{ marginTop: '12px' }}>
+        <button
+          className={`${styles.channelItem} ${pathname === '/alerts' ? styles.active : ''}`}
+          onClick={() => {
+            router.push('/alerts');
+            setAlertsUnreadCount(0); // optimistic clear
+          }}
+        >
+          <span className={styles.channelHash}>⚠️</span>
+          <span className={`${styles.channelName} ${alertsUnreadCount > 0 ? styles.unread : ''}`}>
+            AI Alerts
+          </span>
+          {alertsUnreadCount > 0 && (
+            <span className="badge">{alertsUnreadCount}</span>
+          )}
+        </button>
       </div>
 
       {/* Channels */}

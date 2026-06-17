@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { xhrGet, xhrPost } from '@/lib/xhr';
 import { API } from '@/lib/constants';
 import { getAuthHeaders } from '@/lib/auth';
@@ -62,7 +62,9 @@ const ChatSkeleton = () => (
 
 export default function ChannelPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const channelId = params.id as string;
+  const targetMsgId = searchParams.get('msg');
   const { user } = useAuth();
   const { on, off, send } = useWebSocket();
 
@@ -115,6 +117,16 @@ export default function ChannelPage() {
         console.error('Failed to load messages:', err);
       } finally {
         setIsLoading(false);
+        if (targetMsgId) {
+          setTimeout(() => {
+            const el = document.getElementById(`msg-${targetMsgId}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.style.backgroundColor = 'rgba(88, 101, 242, 0.2)';
+              setTimeout(() => { el.style.backgroundColor = ''; }, 2000);
+            }
+          }, 100);
+        }
       }
     };
     loadMessages();
@@ -424,7 +436,9 @@ export default function ChannelPage() {
               {group.messages.map((msg) => (
                 <div 
                   key={msg.id} 
+                  id={`msg-${msg.id}`}
                   className={`${styles.messageGroup} ${msg.sender_id === user?.id ? styles.messageSelf : ''} ${msg.status === 'sending' ? styles.messageSending : ''} ${msg.status === 'error' ? styles.messageError : ''}`}
+                  style={{ transition: 'background-color 0.5s ease' }}
                 >
                   <div className={styles.messageAvatar}>
                     {getInitials(msg.sender_display_name)}
