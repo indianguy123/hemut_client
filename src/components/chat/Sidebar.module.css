@@ -1,0 +1,304 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  animation: slideInLeft 0.3s ease;
+}
+
+.workspaceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.workspaceName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+}
+
+.connectionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--offline);
+  transition: background var(--transition-base);
+}
+
+.connectionDot.connected {
+  background: var(--online);
+}
+
+.section {
+  padding: 12px 8px 8px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.addButton {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.addButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.channelList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.channelItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.channelItem:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.channelItem.active {
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.channelHash {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: var(--font-size-md);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.channelName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channelName.unread {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* New channel form */
+.newChannelForm {
+  padding: 4px 8px 8px;
+}
+
+.newChannelInput {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.newChannelInput:focus {
+  border-color: var(--border-focus);
+}
+
+.formError {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+/* User picker */
+.userPicker {
+  padding: 4px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.userPickerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.userPickerItem:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.userPickerAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.noUsers {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: 8px;
+  text-align: center;
+}
+
+/* DM item avatar */
+.dmItemAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 600;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.dmPresenceDot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+}
+
+/* User footer */
+.userFooter {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-primary);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.logoutButton {
+  padding: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.logoutButton:hover {
+  background: var(--bg-hover);
+  color: var(--danger);
+}
