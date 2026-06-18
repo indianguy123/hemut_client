@@ -456,7 +456,119 @@ The app will be available at **http://localhost:3000**.
 
 ## Docker
 
-### Multi-Stage Build
+The easiest way to run the entire platform (frontend, backend, database, redis) is using Docker Compose.
+
+### 1. Environment Configuration
+Create a `.env` file in the root of the project with the following necessary variables:
+```env
+# Required for Backend Authentication
+JWT_SECRET=your_super_secret_jwt_key_here
+
+# Optional: AI Features (RAG, Alerts)
+OPENAI_API_KEY=your_openai_api_key_here
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_INDEX_NAME=hemut-rag
+
+# Optional: Cloudinary File Uploads
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+*Note: `DATABASE_URL` and `REDIS_URL` are already configured inside the `docker-compose.yml` for the local container network.*
+
+### 2. Run the Platform
+Run the following command from the root directory to spin up all services:
+```bash
+docker-compose up --build
+```
+Once running, the frontend will be available at **http://localhost:3000** and the backend API at **http://localhost:8000**.
+
+### `docker-compose.yml` Reference
+If you don't have the `docker-compose.yml` file, here is the complete content to place in the root directory:
+
+```yaml
+services:
+  # ---------------------------------------------------------------------------
+  # Infrastructure
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: hemut-postgres
+    environment:
+      POSTGRES_USER: hemut
+      POSTGRES_PASSWORD: hemut_secret
+      POSTGRES_DB: hemut_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hemut -d hemut_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: hemut-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Application
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hemut-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Override DB/Redis URLs to point to Docker service hostnames
+      DATABASE_URL: postgresql://hemut:hemut_secret@postgres:5432/hemut_db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_WS_URL: ws://localhost:8000
+    container_name: hemut-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+### Multi-Stage Build & Manual Docker Run
 
 The Dockerfile uses a multi-stage build for minimal production images:
 
@@ -472,8 +584,6 @@ EXPOSE 3000
 CMD ["node", "server.js"]
 ```
 
-### Build & Run
-
 ```bash
 # Build
 docker build -t hemut-frontend \
@@ -483,12 +593,6 @@ docker build -t hemut-frontend \
 
 # Run
 docker run -p 3000:3000 hemut-frontend
-```
-
-Or use the root `docker-compose.yml`:
-
-```bash
-docker-compose up --build
 ```
 
 ---
