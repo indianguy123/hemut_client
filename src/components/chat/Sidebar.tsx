@@ -178,10 +178,8 @@ export default function Sidebar() {
       {/* Workspace header */}
       <div className={styles.workspaceHeader}>
         <div className={styles.workspaceName}>
-          <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="8" fill="url(#sg)" />
-            <path d="M12 20L18 26L28 14" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            <defs><linearGradient id="sg" x1="0" y1="0" x2="40" y2="40"><stop stopColor="#5b6eea" /><stop offset="1" stopColor="#7c4dff" /></linearGradient></defs>
+          <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+            <path d="M14 24L20 8L22 8L18 20L26 20L20 36L18 36L22 24L14 24Z" fill="#FFD33B" />
           </svg>
           <span>Hemut Logistics</span>
         </div>

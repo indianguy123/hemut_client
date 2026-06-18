@@ -3,9 +3,10 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--bg-primary);
+  background-color: #121212;
   position: relative;
   overflow: hidden;
+  font-family: var(--font-primary);
 }
 
 .authBackground {
@@ -13,124 +14,100 @@
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
 }
 
-.bgOrb1, .bgOrb2, .bgOrb3 {
+/* Add a subtle radial gradient so the grid fades out at the edges */
+.authBackground::after {
+  content: '';
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
-}
-
-.bgOrb1 {
-  width: 500px;
-  height: 500px;
-  background: var(--accent-primary);
-  top: -100px;
-  right: -100px;
-  animation: floatOrb 8s ease-in-out infinite;
-}
-
-.bgOrb2 {
-  width: 400px;
-  height: 400px;
-  background: var(--accent-secondary);
-  bottom: -80px;
-  left: -80px;
-  animation: floatOrb 10s ease-in-out infinite reverse;
-}
-
-.bgOrb3 {
-  width: 300px;
-  height: 300px;
-  background: #3ba55d;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: floatOrb 12s ease-in-out infinite;
-}
-
-@keyframes floatOrb {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(30px, -30px); }
-  66% { transform: translate(-20px, 20px); }
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 0%, #121212 70%);
 }
 
 .authCard {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 440px;
-  padding: 40px;
-  background: rgba(32, 35, 42, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), 0 0 60px rgba(91, 110, 234, 0.06);
+  max-width: 420px;
+  padding: 48px;
+  background: rgba(18, 18, 18, 0.6);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px; /* Sharper radius */
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
   animation: bounceIn 0.5s ease;
 }
 
 .authHeader {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .logo {
   display: inline-flex;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
 .authTitle {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #FFFFFF;
   margin-bottom: 8px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .authSubtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
+  font-size: 1rem;
+  color: #95928E;
 }
 
 .authForm {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .label {
-  font-size: var(--font-size-sm);
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #C8C7C5;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .input {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
 .input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: #FFD33B;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px #FFD33B;
 }
 
 .input::placeholder {
-  color: var(--text-muted);
+  color: #6F6F6F;
 }
 
 .input:disabled {
@@ -141,20 +118,21 @@
 .submitButton {
   width: 100%;
   padding: 14px;
-  background: var(--accent-gradient);
-  color: white;
-  font-size: var(--font-size-base);
+  background: #FFFFFF;
+  color: #121212;
+  font-size: 1.05rem;
   font-weight: 600;
-  border-radius: var(--radius-md);
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  border-radius: 4px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 52px;
+  margin-top: 8px;
 }
 
 .submitButton:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #EAEAEA;
   transform: translateY(-1px);
 }
 
@@ -170,8 +148,8 @@
 .buttonSpinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2px solid rgba(18, 18, 18, 0.3);
+  border-top-color: #121212;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -183,26 +161,28 @@
   padding: 12px 16px;
   background: rgba(237, 66, 69, 0.1);
   border: 1px solid rgba(237, 66, 69, 0.3);
-  border-radius: var(--radius-md);
-  color: var(--danger);
-  font-size: var(--font-size-sm);
+  border-radius: 4px;
+  color: #f23f43;
+  font-size: 0.9rem;
   animation: fadeInUp 0.2s ease;
 }
 
 .authFooter {
   text-align: center;
-  margin-top: 24px;
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  margin-top: 32px;
+  font-size: 0.9rem;
+  color: #95928E;
 }
 
 .authLink {
-  color: var(--accent-primary);
+  color: #FFD33B;
   font-weight: 500;
+  transition: opacity 0.2s ease;
 }
 
 .authLink:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  opacity: 0.8;
 }
 
 /* Password strength indicator */
@@ -216,17 +196,17 @@
   flex: 1;
   height: 3px;
   border-radius: 2px;
-  background: var(--bg-tertiary);
-  transition: background var(--transition-base);
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.2s ease;
 }
 
-.strengthBar.active.weak { background: var(--danger); }
-.strengthBar.active.fair { background: var(--warning); }
-.strengthBar.active.good { background: var(--accent-primary); }
-.strengthBar.active.strong { background: var(--success); }
+.strengthBar.active.weak { background: #f23f43; }
+.strengthBar.active.fair { background: #f0b232; }
+.strengthBar.active.good { background: #29BB7B; }
+.strengthBar.active.strong { background: #00B53C; }
 
 .strengthLabel {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin-top: 2px;
+  font-size: 0.75rem;
+  color: #6F6F6F;
+  margin-top: 4px;
 }

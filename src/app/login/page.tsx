@@ -79,19 +79,13 @@ export default function LoginPage() {
       <div className={styles.authCard}>
         <div className={styles.authHeader}>
           <div className={styles.logo}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <rect width="40" height="40" rx="10" fill="url(#logo-grad)" />
-              <path d="M12 20L18 26L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-              <defs>
-                <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40">
-                  <stop stopColor="#5b6eea" />
-                  <stop offset="1" stopColor="#7c4dff" />
-                </linearGradient>
-              </defs>
+            <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+              <path d="M14 24L20 8L22 8L18 20L26 20L20 36L18 36L22 24L14 24Z" fill="#FFD33B" />
             </svg>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 600, color: 'white', marginLeft: '8px' }}>Hemut</span>
           </div>
           <h1 className={styles.authTitle}>Welcome back</h1>
-          <p className={styles.authSubtitle}>Sign in to Hemut Logistics</p>
+          <p className={styles.authSubtitle}>Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.authForm} id="login-form">

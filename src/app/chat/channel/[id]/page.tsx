@@ -76,10 +76,13 @@ export default function ChannelPage() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [stagedFile, setStagedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesAreaRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback((smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
@@ -207,9 +210,11 @@ export default function ChannelPage() {
   // Send message
   const handleSend = async () => {
     const text = inputValue.trim();
-    if (!text) return;
+    if (!text && !stagedFile) return;
 
     setInputValue('');
+    const fileToSend = stagedFile;
+    setStagedFile(null);
 
     // Check for /shipment command
     const shipmentMatch = text.match(/^\/shipment\s+(.+)$/i);
@@ -285,8 +290,8 @@ export default function ChannelPage() {
       sender_username: user?.username || '',
       sender_display_name: user?.display_name || user?.username || '',
       sender_avatar_url: user?.avatar_url || null,
-      content: text,
-      message_type: 'text',
+      content: text || (fileToSend ? `Uploading ${fileToSend.name}...` : ''),
+      message_type: fileToSend ? 'media' : 'text',
       metadata: null,
       sequence_num: (messages.length > 0 ? messages[messages.length - 1].sequence_num : 0) + 1,
       created_at: new Date().toISOString(),
@@ -296,15 +301,29 @@ export default function ChannelPage() {
     setTimeout(() => scrollToBottom(), 50);
 
     try {
+      let mediaMetadata = null;
+      if (fileToSend) {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', fileToSend);
+        
+        const { promise: uploadPromise } = xhrPost<any>(API.UPLOAD, formData, getAuthHeaders());
+        const uploadResp = await uploadPromise;
+        mediaMetadata = uploadResp.data;
+        setIsUploading(false);
+      }
+
       const { promise } = xhrPost(API.MESSAGES(channelId), {
-        content: text,
-        message_type: 'text',
+        content: text || (fileToSend ? `Attached: ${fileToSend.name}` : ''),
+        message_type: fileToSend ? 'media' : 'text',
+        metadata: mediaMetadata,
       }, getAuthHeaders());
       const resp = await promise;
       setMessages(prev => prev.map(m => m.id === tempId ? { ...resp.data, status: 'sent' } : m));
     } catch (err) {
       console.error('Failed to send message:', err);
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: 'error' } : m));
+      setIsUploading(false);
     }
   };
 
@@ -378,6 +397,43 @@ export default function ChannelPage() {
             </span>
           )}
         </div>
+      </div>
+    );
+  };
+
+  const renderMediaCard = (metadata: Record<string, unknown>) => {
+    if (!metadata) return null;
+    if (metadata.resource_type === 'image') {
+      return (
+        <div style={{ marginTop: '8px', borderRadius: '8px', overflow: 'hidden', display: 'inline-block', border: '1px solid var(--border-primary)' }}>
+          <img 
+            src={metadata.url as string} 
+            alt={metadata.original_filename as string}
+            style={{ maxWidth: '350px', maxHeight: '350px', display: 'block', objectFit: 'contain' }}
+            loading="lazy"
+          />
+        </div>
+      );
+    }
+    return (
+      <div style={{ marginTop: '8px', padding: '16px', borderRadius: '8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-primary)', display: 'inline-flex', alignItems: 'center', gap: '16px', minWidth: '280px' }}>
+        <div style={{ fontSize: '32px' }}>📄</div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+            {metadata.original_filename as string}
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+            {Math.round((metadata.bytes as number) / 1024)} KB • {metadata.format as string}
+          </div>
+        </div>
+        <a 
+          href={metadata.url as string} 
+          target="_blank" 
+          rel="noreferrer"
+          style={{ padding: '8px', borderRadius: '4px', background: 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', textDecoration: 'none' }}
+        >
+          ⬇️
+        </a>
       </div>
     );
   };
@@ -457,6 +513,7 @@ export default function ChannelPage() {
                     </div>
                     <div className={styles.messageText}>{msg.content}</div>
                     {msg.message_type === 'shipment' && msg.metadata && renderShipmentCard(msg.metadata)}
+                    {msg.message_type === 'media' && msg.metadata && renderMediaCard(msg.metadata)}
                   </div>
                 </div>
               ))}
@@ -480,7 +537,41 @@ export default function ChannelPage() {
 
       {/* Message input */}
       <div className={styles.messageInputContainer}>
-        <div className={styles.messageInputWrapper}>
+        {stagedFile && (
+          <div style={{ padding: '8px 16px', background: 'var(--bg-tertiary)', borderRadius: '8px 8px 0 0', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border-primary)', borderBottom: 'none' }}>
+            <div style={{ fontSize: '24px' }}>{stagedFile.type.startsWith('image/') ? '🖼️' : '📄'}</div>
+            <div style={{ flex: 1, fontWeight: 500, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {stagedFile.name}
+            </div>
+            <button onClick={() => setStagedFile(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}>
+              ✕
+            </button>
+          </div>
+        )}
+        <div className={styles.messageInputWrapper} style={{ borderRadius: stagedFile ? '0 0 8px 8px' : '8px' }}>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setStagedFile(e.target.files[0]);
+              }
+              e.target.value = ''; // reset
+            }}
+          />
+          <button 
+            className={styles.sendButton} 
+            style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)', marginLeft: '8px', padding: '8px', borderRadius: '50%' }}
+            onClick={() => fileInputRef.current?.click()}
+            title="Upload a file"
+            disabled={isUploading}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
           <input
             className={styles.messageInput}
             value={inputValue}
@@ -497,15 +588,23 @@ export default function ChannelPage() {
           <button
             className={styles.sendButton}
             onClick={handleSend}
-            disabled={!inputValue.trim()}
+            disabled={(!inputValue.trim() && !stagedFile) || isUploading}
             id="send-message-button"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
+            {isUploading ? (
+              <span className="spinner" style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      `}} />
 
       {/* AI Chat Panel */}
       <AiChatPanel

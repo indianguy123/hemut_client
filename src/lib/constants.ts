@@ -41,6 +41,9 @@ export const API = {
   // Alerts
   ALERTS: `${API_URL}/api/alerts`,
   RESOLVE_ALERT: (id: string) => `${API_URL}/api/alerts/${id}/resolve`,
+
+  // Media
+  UPLOAD: `${API_URL}/api/upload`,
 } as const;
 
 export const WS = {
