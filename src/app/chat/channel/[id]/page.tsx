@@ -242,7 +242,7 @@ export default function ChannelPage() {
         setMessages(prev => [...prev, optimisticMsg]);
         setTimeout(() => scrollToBottom(), 50);
 
-        const { promise: postPromise } = xhrPost(API.MESSAGES(channelId), {
+        const { promise: postPromise } = xhrPost<MessageData>(API.MESSAGES(channelId), {
           content: `📦 Shipment ${shipment.data.tracking_id}`,
           message_type: 'shipment',
           metadata: shipment.data,
@@ -269,7 +269,7 @@ export default function ChannelPage() {
         setTimeout(() => scrollToBottom(), 50);
 
         try {
-          const { promise: postPromise } = xhrPost(API.MESSAGES(channelId), {
+          const { promise: postPromise } = xhrPost<MessageData>(API.MESSAGES(channelId), {
             content: `⚠️ Shipment "${trackingId}" not found`,
             message_type: 'text',
           }, getAuthHeaders());
@@ -313,7 +313,7 @@ export default function ChannelPage() {
         setIsUploading(false);
       }
 
-      const { promise } = xhrPost(API.MESSAGES(channelId), {
+      const { promise } = xhrPost<MessageData>(API.MESSAGES(channelId), {
         content: text || (fileToSend ? `Attached: ${fileToSend.name}` : ''),
         message_type: fileToSend ? 'media' : 'text',
         metadata: mediaMetadata,

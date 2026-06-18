@@ -173,7 +173,7 @@ export default function DMPage() {
     setTimeout(() => scrollToBottom(), 50);
 
     try {
-      const { promise } = xhrPost(API.MESSAGES(channelId), { content: text, message_type: 'text' }, getAuthHeaders());
+      const { promise } = xhrPost<MessageData>(API.MESSAGES(channelId), { content: text, message_type: 'text' }, getAuthHeaders());
       const resp = await promise;
       setMessages(prev => prev.map(m => m.id === tempId ? { ...resp.data, status: 'sent' } : m));
     } catch (err) {
