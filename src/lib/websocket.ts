@@ -19,6 +19,7 @@ export function createWSClient(url: string): WSClient {
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   let intentionalClose = false;
+  let isConnecting = false;
 
   const MAX_RECONNECT_ATTEMPTS = 10;
   const HEARTBEAT_INTERVAL = 30000; // 30 seconds
@@ -59,23 +60,29 @@ export function createWSClient(url: string): WSClient {
   }
 
   function connect() {
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    if (isConnecting || (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))) {
       return;
     }
 
     intentionalClose = false;
+    isConnecting = true;
 
     try {
+      // Sanitize URL for logging (remove token)
+      const safeUrl = url.replace(/token=[^&]+/, 'token=***');
+      console.log(`WebSocket connecting to ${safeUrl}`);
       ws = new WebSocket(url);
     } catch (err) {
-      console.error('WebSocket connection failed:', err);
+      console.error('WebSocket construction failed:', err);
+      isConnecting = false;
       scheduleReconnect();
       return;
     }
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
+      console.log('WebSocket connected successfully');
       reconnectAttempts = 0;
+      isConnecting = false;
       startHeartbeat();
       emit('connected', {});
     };
@@ -97,17 +104,26 @@ export function createWSClient(url: string): WSClient {
     };
 
     ws.onclose = (event) => {
-      console.log(`WebSocket closed: code=${event.code} reason=${event.reason}`);
+      isConnecting = false;
+      const reason = event.reason || (event.code === 1006 ? 'Abnormal closure (server unreachable or connection dropped)' : 'Unknown');
+      console.warn(`WebSocket closed: code=${event.code} reason=${reason}`);
       stopHeartbeat();
-      emit('disconnected', { code: event.code, reason: event.reason });
+      emit('disconnected', { code: event.code, reason });
 
-      if (!intentionalClose) {
+      // Don't reconnect if closed intentionally or due to auth failure
+      if (!intentionalClose && event.code !== 4001) {
         scheduleReconnect();
+      } else if (event.code === 4001) {
+        console.warn('WebSocket authentication failed — not reconnecting. Token may be expired.');
+        emit('auth_error', { code: event.code, reason });
       }
     };
 
-    ws.onerror = (event) => {
-      console.error('WebSocket error:', event);
+    ws.onerror = () => {
+      // Note: Browser WebSocket error events contain no useful info.
+      // The subsequent onclose event provides the close code/reason.
+      // Only emit to handlers; diagnostics come from onclose.
+      isConnecting = false;
       emit('error', {});
     };
   }
@@ -130,6 +146,7 @@ export function createWSClient(url: string): WSClient {
 
   function disconnect() {
     intentionalClose = true;
+    isConnecting = false;
     stopHeartbeat();
 
     if (reconnectTimer) {
